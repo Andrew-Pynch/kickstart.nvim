@@ -184,11 +184,6 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
---  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -227,6 +222,273 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  {
+    'nvim-neo-tree/neo-tree.nvim',
+    config = function()
+      require('neo-tree').setup {
+        close_if_last_window = false,
+        popup_border_style = 'rounded',
+        enable_git_status = true,
+        enable_diagnostics = true,
+        enable_normal_mode_for_inputs = false,
+        open_files_do_not_replace_types = { 'terminal', 'trouble', 'qf' },
+        sort_case_insensitive = false,
+        sort_function = nil,
+        default_component_configs = {
+          container = {
+            enable_character_fade = true,
+          },
+          indent = {
+            indent_size = 5,
+            padding = 1,
+            with_markers = true,
+            indent_marker = '│',
+            last_indent_marker = '└',
+            highlight = 'NeoTreeIndentMarker',
+            with_expanders = nil,
+            expander_collapsed = '',
+            expander_expanded = '',
+            expander_highlight = 'NeoTreeExpander',
+          },
+          icon = {
+            folder_closed = '',
+            folder_open = '',
+            folder_empty = '󰜌',
+            default = '*',
+            highlight = 'NeoTreeFileIcon',
+          },
+          modified = {
+            symbol = '[+]',
+            highlight = 'NeoTreeModified',
+          },
+          name = {
+            trailing_slash = false,
+            use_git_status_colors = true,
+            highlight = 'NeoTreeFileName',
+          },
+          git_status = {
+            symbols = {
+              added = '',
+              modified = '',
+              deleted = '✖',
+              renamed = '󰁕',
+              untracked = '',
+              ignored = '',
+              unstaged = '󰄱',
+              staged = '',
+              conflict = '',
+            },
+          },
+        },
+        window = {
+          position = 'left',
+          width = 40,
+          mapping_options = {
+            noremap = true,
+            nowait = true,
+          },
+          mappings = {
+            ['<space>'] = {
+              'toggle_node',
+              nowait = false,
+            },
+            ['<2-LeftMouse>'] = 'open',
+            ['<cr>'] = 'open',
+            ['<esc>'] = 'cancel',
+            ['P'] = { 'toggle_preview', config = { use_float = true } },
+            ['l'] = 'focus_preview',
+            ['S'] = 'open_split',
+            ['s'] = 'open_vsplit',
+            ['t'] = 'open_tabnew',
+            ['w'] = 'open_with_window_picker',
+            ['C'] = 'close_node',
+            ['z'] = 'close_all_nodes',
+            ['a'] = {
+              'add',
+              config = {
+                show_path = 'none',
+              },
+            },
+            ['A'] = 'add_directory',
+            ['d'] = 'delete',
+            ['r'] = 'rename',
+            ['y'] = 'copy_to_clipboard',
+            ['x'] = 'cut_to_clipboard',
+            ['p'] = 'paste_from_clipboard',
+            ['c'] = 'copy',
+            ['m'] = 'move',
+            ['q'] = 'close_window',
+            ['R'] = 'refresh',
+            ['?'] = 'show_help',
+            ['<'] = 'prev_source',
+            ['>'] = 'next_source',
+            ['i'] = 'show_file_details',
+          },
+        },
+        nesting_rules = {},
+        filesystem = {
+          filtered_items = {
+            visible = false,
+            hide_dotfiles = false,
+            hide_gitignored = false,
+            hide_hidden = true,
+            hide_by_name = {},
+            hide_by_pattern = {},
+            always_show = {},
+            never_show = {},
+            never_show_by_pattern = {},
+          },
+          follow_current_file = {
+            enabled = true,
+            leave_dirs_open = false,
+          },
+          group_empty_dirs = false,
+          hijack_netrw_behavior = 'open_default',
+          use_libuv_file_watcher = false,
+          window = {
+            mappings = {
+              ['<bs>'] = 'navigate_up',
+              ['.'] = 'set_root',
+              ['H'] = 'toggle_hidden',
+              ['/'] = 'fuzzy_finder',
+              ['D'] = 'fuzzy_finder_directory',
+              ['#'] = 'fuzzy_sorter',
+              ['f'] = 'filter_on_submit',
+              ['<c-x>'] = 'clear_filter',
+              ['[g'] = 'prev_git_modified',
+              [']g'] = 'next_git_modified',
+              ['o'] = { 'show_help', nowait = false, config = { title = 'Order by', prefix_key = 'o' } },
+              ['oc'] = { 'order_by_created', nowait = false },
+              ['od'] = { 'order_by_diagnostics', nowait = false },
+              ['og'] = { 'order_by_git_status', nowait = false },
+              ['om'] = { 'order_by_modified', nowait = false },
+              ['on'] = { 'order_by_name', nowait = false },
+              ['os'] = { 'order_by_size', nowait = false },
+              ['ot'] = { 'order_by_type', nowait = false },
+            },
+            fuzzy_finder_mappings = {
+              ['<down>'] = 'move_cursor_down',
+              ['<C-n>'] = 'move_cursor_down',
+              ['<up>'] = 'move_cursor_up',
+              ['<C-p>'] = 'move_cursor_up',
+            },
+          },
+        },
+        buffers = {
+          follow_current_file = {
+            enabled = true,
+            leave_dirs_open = false,
+          },
+          group_empty_dirs = true,
+          show_unloaded = true,
+          window = {
+            mappings = {
+              ['<bs>'] = 'navigate_up',
+              ['.'] = 'set_root',
+              ['o'] = { 'show_help', nowait = false, config = { title = 'Order by', prefix_key = 'o' } },
+              ['oc'] = { 'order_by_created', nowait = false },
+              ['od'] = { 'order_by_diagnostics', nowait = false },
+              ['om'] = { 'order_by_modified', nowait = false },
+              ['on'] = { 'order_by_name', nowait = false },
+              ['os'] = { 'order_by_size', nowait = false },
+              ['ot'] = { 'order_by_type', nowait = false },
+            },
+          },
+        },
+        git_status = {
+          window = {
+            position = 'float',
+            mappings = {
+              ['A'] = 'git_add_all',
+              ['gu'] = 'git_unstage_file',
+              ['ga'] = 'git_add_file',
+              ['gr'] = 'git_revert_file',
+              ['gc'] = 'git_commit',
+              ['gp'] = 'git_push',
+              ['gg'] = 'git_commit_and_push',
+              ['o'] = { 'show_help', nowait = false, config = { title = 'Order by', prefix_key = 'o' } },
+              ['oc'] = { 'order_by_created', nowait = false },
+              ['od'] = { 'order_by_diagnostics', nowait = false },
+              ['om'] = { 'order_by_modified', nowait = false },
+              ['on'] = { 'order_by_name', nowait = false },
+              ['os'] = { 'order_by_size', nowait = false },
+              ['ot'] = { 'order_by_type', nowait = false },
+            },
+          },
+        },
+      }
+
+      vim.cmd [[nnoremap \ :Neotree reveal<cr>]]
+    end,
+    opts = {
+      filesystem = {
+        filtered_items = {
+          visible = true,
+          show_hidden_count = true,
+          hide_dotfiles = false,
+          hide_gitignored = true,
+          hide_by_name = {},
+          never_show = {},
+        },
+      },
+    },
+    version = '*',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-tree/nvim-web-devicons',
+      'MunifTanjim/nui.nvim',
+    },
+  },
+  {
+    'OlegGulevskyy/better-ts-errors.nvim',
+    dependencies = { 'MunifTanjim/nui.nvim' },
+  },
+  {
+    'norcalli/nvim-colorizer.lua',
+    config = function()
+      require('colorizer').setup()
+    end,
+  },
+  'prisma/vim-prisma',
+  'nvim-lua/plenary.nvim',
+  {
+    'Pocco81/auto-save.nvim',
+    config = function()
+      require('auto-save').setup {
+        events = { 'InsertLeave', 'TextChanged' },
+        on_off_commands = true,
+        write_all_buffers = false,
+        on_before_save = function()
+          vim.cmd 'Neoformat'
+        end,
+      }
+    end,
+  },
+  {
+    'ThePrimeagen/harpoon',
+  },
+  {
+    'supermaven-inc/supermaven-nvim',
+    config = function()
+      require('supermaven-nvim').setup {
+        keymaps = {
+          accept_suggestion = '<C-l>',
+          clear_suggestion = '<C-]>',
+          accept_word = '<C-j>',
+        },
+        ignore_filetypes = {},
+        disable_keymaps = false,
+      }
+    end,
+  },
+  {
+    'Hrle97/nvim.diagnostic_virtual_text_config',
+    config = function()
+      require('nvim.diagnostic_virtual_text_config').setup {
+        -- your config here...
+      }
+    end,
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -750,11 +1012,11 @@ require('lazy').setup({
           --
           -- <c-l> will move you to the right of each of the expansion locations.
           -- <c-h> is similar, except moving you backwards.
-          ['<C-l>'] = cmp.mapping(function()
-            if luasnip.expand_or_locally_jumpable() then
-              luasnip.expand_or_jump()
-            end
-          end, { 'i', 's' }),
+          -- ['<C-l>'] = cmp.mapping(function()
+          --   if luasnip.expand_or_locally_jumpable() then
+          --     luasnip.expand_or_jump()
+          --   end
+          -- end, { 'i', 's' }),
           ['<C-h>'] = cmp.mapping(function()
             if luasnip.locally_jumpable(-1) then
               luasnip.jump(-1)
@@ -872,13 +1134,12 @@ require('lazy').setup({
   --
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
-  --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
@@ -910,3 +1171,90 @@ require('lazy').setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- NOTE: This is custom andrew shit below this line
+-- HARPOON
+-- Setup harpoon
+require('harpoon').setup {
+  global_settings = {
+    enter_on_sendcmd = true,
+    tmux_autoclose_windows = true,
+  },
+}
+
+-- Harpoon mark commands
+vim.cmd [[
+    nnoremap <leader>m :lua require("harpoon.mark").add_file()<CR>
+    nnoremap <leader>mm :lua require("harpoon.mark").()<CR>
+    nnoremap <silent>'a :lua require("harpoon.ui").nav_file(1)<CR>
+    nnoremap <silent>'s :lua require("harpoon.ui").nav_file(2)<CR>
+    nnoremap <silent>'d :lua require("harpoon.ui").nav_file(3)<CR>
+    nnoremap <silent>'f :lua require("harpoon.ui").nav_file(4)<CR>
+    nnoremap <silent>'g :lua require("harpoon.ui").nav_file(5)<CR>
+
+    nnoremap <silent>'t :lua require("harpoon.term").gotoTerminal(1)<CR>
+]]
+
+-- Other maps (terminal, ui, etc)
+vim.keymap.set('n', '<leader>pa', ':lua require("harpoon.ui").toggle_quick_menu()<CR>', { noremap = true })
+vim.keymap.set('n', '<leader>pA', ':lua require("harpoon.cmd-ui").toggle_quick_menu()<CR>', { noremap = true })
+
+vim.keymap.set('n', '<leader>T', ':lua require("harpoon.tmux").gotoTerminal(3)<CR>', { noremap = true })
+vim.keymap.set('n', '<leader>t', ':lua require("harpoon.tmux").gotoTerminal(2)<CR>', { noremap = true })
+
+vim.keymap.set('n', '<leader><Enter>', ':lua require("harpoon.tmux").sendCommand(1, 1)<CR>', { noremap = true })
+
+vim.keymap.set('n', '<leader>\\', ':lua require("harpoon.tmux").sendCommand(2, 2)<CR>', { noremap = true })
+
+-- maps for import export bulk shit for llms
+vim.keymap.set('n', '<leader>yf', function()
+  vim.cmd '%yank +'
+  vim.notify('Copied file to clipboard', vim.log.levels.INFO)
+end, { noremap = true, silent = true })
+
+-- Enable cursorline
+vim.wo.cursorline = true
+
+-- Set dim highlight for the cursor line
+vim.cmd [[ highlight CursorLine cterm=none ctermbg=236 guibg=#2c2d27 ]]
+
+-- CUSTOM KEY MAPPINGS
+vim.keymap.set('n', '<leader>x', '<cmd>!chmod +x %<CR>', { noremap = true, silent = true })
+
+vim.keymap.set('n', '<leader>gb', '<cmd>b#<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>bd', '<cmd>bd<CR>')
+
+vim.keymap.set('n', '<leader>t', '<cmd>ToggleTerm<CR>')
+-- TODO: I think I can deprecate this
+-- vim.keymap.set('n', '<leader>ff', function()
+--   vim.cmd 'Neoformat'
+--   vim.cmd 'w'
+-- end)
+vim.keymap.set('n', '<leader>cf', '<cmd>silent !cargo fmt --quiet<CR>')
+vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>')
+vim.keymap.set('n', '<leader>E', '<cmd>Neotree reveal<CR>')
+
+-- close and save ALL buffers
+-- vim.api.nvim_exec([[
+--   autocmd BufNewFile,BufRead * lua open_in_tab()
+-- ]], false)
+vim.keymap.set('n', '<leader>q', function()
+  vim.cmd 'wa' -- Write all buffers
+  vim.cmd 'qa' -- Quit all buffers
+end)
+
+-- ctrl + w to close current buffer
+vim.keymap.set('n', '<C-w>', '<cmd>wq<CR>')
+
+-- ctrl + s to save
+vim.keymap.set('n', '<C-s>', '<cmd>w<CR>')
+
+-- vsplit and hsplit binds
+vim.keymap.set('n', '<leader>V', '<cmd>vsplit<CR><C-w>l')
+vim.keymap.set('n', '<leader>H', '<cmd>split<CR><C-w>j')
+
+-- Move between splits with ctrl + shift + hjkl
+vim.keymap.set('n', '<leader>h', '<C-w>h')
+vim.keymap.set('n', '<leader>j', '<C-w>j')
+vim.keymap.set('n', '<leader>k', '<C-w>k')
+vim.keymap.set('n', '<leader>l', '<C-w>l')
