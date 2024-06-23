@@ -458,6 +458,20 @@ require('lazy').setup({
         events = { 'InsertLeave', 'TextChanged' },
         on_off_commands = true,
         write_all_buffers = false,
+        condition = function(buf)
+          local fn = vim.fn
+          local utils = require 'auto-save.utils.data'
+
+          -- Don't auto-save if the operation was an undo or redo
+          if fn.undotree().seq_cur ~= fn.undotree().seq_last then
+            return false
+          end
+
+          if fn.getbufvar(buf, '&modifiable') == 1 and utils.not_in(fn.getbufvar(buf, '&filetype'), {}) then
+            return true
+          end
+          return false
+        end,
         on_before_save = function()
           vim.cmd 'Neoformat'
         end,
@@ -466,6 +480,17 @@ require('lazy').setup({
   },
   {
     'ThePrimeagen/harpoon',
+  },
+  {
+    'windwp/nvim-ts-autotag',
+    opts = {},
+  },
+  {
+    'williamboman/mason.nvim',
+    config = true,
+  },
+  {
+    'steelsojka/headwind.nvim',
   },
   {
     'supermaven-inc/supermaven-nvim',
@@ -837,7 +862,7 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
+        tsserver = {},
         --
 
         lua_ls = {
@@ -919,7 +944,8 @@ require('lazy').setup({
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
+        javascript = { { 'prettierd', 'prettier' } },
+        typescript = { { 'prettierd', 'prettier' } },
       },
     },
   },
@@ -995,7 +1021,7 @@ require('lazy').setup({
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
+          ['<CR>'] = cmp.mapping.confirm { select = true },
           --['<Tab>'] = cmp.mapping.select_next_item(),
           --['<S-Tab>'] = cmp.mapping.select_prev_item(),
 
@@ -1035,24 +1061,33 @@ require('lazy').setup({
     end,
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
+  -- NOTE: This is the default colorscheme
+  -- { -- You can easily change to a different colorscheme.
+  --   -- Change the name of the colorscheme plugin below, and then
+  --   -- change the command in the config to whatever the name of that colorscheme is.
+  --   --
+  --   -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+  --   'folke/tokyonight.nvim',
+  --   priority = 1000, -- Make sure to load this before all the other start plugins.
+  --   init = function()
+  --     -- Load the colorscheme here.
+  --     -- Like many other themes, this one has different styles, and you could load
+  --     -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+  --     vim.cmd.colorscheme 'tokyonight-night'
+  --
+  --     -- You can configure highlights by doing something like:
+  --     vim.cmd.hi 'Comment gui=none'
+  --   end,
+  -- },
+  {
+    -- gruvbox theme
+    'ellisonleao/gruvbox.nvim',
+    priority = 1000,
+    config = function()
+      vim.o.termguicolors = true
+      vim.cmd.colorscheme 'gruvbox'
     end,
   },
-
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
@@ -1097,7 +1132,19 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'vim',
+        'vimdoc',
+        'typescript',
+        'python',
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1258,3 +1305,34 @@ vim.keymap.set('n', '<leader>h', '<C-w>h')
 vim.keymap.set('n', '<leader>j', '<C-w>j')
 vim.keymap.set('n', '<leader>k', '<C-w>k')
 vim.keymap.set('n', '<leader>l', '<C-w>l')
+
+-- auto save on insert leave
+vim.api.nvim_create_autocmd('InsertLeave', {
+  pattern = '*',
+  callback = function()
+    if vim.bo.modified then
+      vim.cmd 'silent! write'
+      vim.notify('File saved', vim.log.levels.INFO)
+    end
+  end,
+  nested = true,
+})
+
+-- Mason and LSP setup for tailwindcss
+local status, mason = pcall(require, 'mason')
+if not status then
+  return
+end
+local status2, lspconfig = pcall(require, 'mason-lspconfig')
+if not status2 then
+  return
+end
+
+mason.setup {}
+
+lspconfig.setup {
+  ensure_installed = { 'tailwindcss' },
+}
+
+local nvim_lsp = require 'lspconfig'
+nvim_lsp.tailwindcss.setup {}
