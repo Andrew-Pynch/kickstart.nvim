@@ -938,14 +938,13 @@ require('lazy').setup({
         }
       end,
       formatters_by_ft = {
+        ['*'] = { 'prettier' },
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        javascript = { { 'prettierd', 'prettier' } },
-        typescript = { { 'prettierd', 'prettier' } },
       },
     },
   },
@@ -1182,7 +1181,7 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   require 'kickstart.plugins.debug',
-  require 'kickstart.plugins.indent_line',
+  -- require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
@@ -1336,3 +1335,12 @@ lspconfig.setup {
 
 local nvim_lsp = require 'lspconfig'
 nvim_lsp.tailwindcss.setup {}
+
+vim.diagnostic.config { virtual_text = false }
+vim.api.nvim_create_autocmd({ 'CursorHold' }, {
+  callback = function()
+    if vim.lsp.buf_notify(0, '$/progress', {}) then
+      vim.diagnostic.open_float()
+    end
+  end,
+})
