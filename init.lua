@@ -1,5 +1,4 @@
 --[[
-
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
 =====================================================================
@@ -162,7 +161,14 @@ vim.opt.scrolloff = 10
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
--- Diagnostic keymaps
+-- Diagnostic keymaps / settings
+vim.diagnostic.config {
+  virtual_text = true,
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+  severity_sort = false,
+}
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
@@ -579,14 +585,6 @@ require('lazy').setup({
       }
     end,
   },
-  {
-    'Hrle97/nvim.diagnostic_virtual_text_config',
-    config = function()
-      require('nvim.diagnostic_virtual_text_config').setup {
-        -- your config here...
-      }
-    end,
-  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -925,10 +923,10 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
+        clangd = {},
+        gopls = {},
+        pyright = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -999,7 +997,7 @@ require('lazy').setup({
       },
     },
     opts = {
-      notify_on_error = false,
+      notify_on_error = true,
       format_on_save = function(bufnr)
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
@@ -1011,6 +1009,7 @@ require('lazy').setup({
         }
       end,
       formatters_by_ft = {
+        rust = { 'rust_analyzer' },
         ['*'] = { 'prettier' },
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
@@ -1216,6 +1215,8 @@ require('lazy').setup({
         'vimdoc',
         'typescript',
         'python',
+        'zig',
+        'rust',
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
@@ -1254,11 +1255,11 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
-  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.gitsigns',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
@@ -1391,29 +1392,24 @@ vim.api.nvim_create_autocmd('InsertLeave', {
 })
 
 -- Mason and LSP setup for tailwindcss
-local status, mason = pcall(require, 'mason')
-if not status then
-  return
-end
-local status2, lspconfig = pcall(require, 'mason-lspconfig')
-if not status2 then
-  return
-end
+-- local status, mason = pcall(require, 'mason')
+-- if not status then
+--   return
+-- end
+-- local status2, lspconfig = pcall(require, 'mason-lspconfig')
+-- if not status2 then
+--   return
+-- end
+--
+-- mason.setup {}
+--
+-- lspconfig.setup {
+--   ensure_installed = { 'tailwindcss' },
+-- }
+--
+-- local nvim_lsp = require 'lspconfig'
+-- nvim_lsp.tailwindcss.setup {}
 
-mason.setup {}
-
-lspconfig.setup {
-  ensure_installed = { 'tailwindcss' },
-}
-
-local nvim_lsp = require 'lspconfig'
-nvim_lsp.tailwindcss.setup {}
-
-vim.diagnostic.config { virtual_text = false }
-vim.api.nvim_create_autocmd({ 'CursorHold' }, {
-  callback = function()
-    if vim.lsp.buf_notify(0, '$/progress', {}) then
-      vim.diagnostic.open_float()
-    end
-  end,
-})
+-- enable relative line numbers
+vim.opt.number = true
+vim.opt.relativenumber = true
