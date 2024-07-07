@@ -192,6 +192,29 @@ vim.api.nvim_create_autocmd('CursorHold', {
     vim.diagnostic.open_float(nil, opts)
   end,
 })
+-- Function to enter diagnostic window
+local function enter_diagnostic_window()
+  local wins = vim.api.nvim_list_wins()
+
+  for _, win in ipairs(wins) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    local buf_name = vim.api.nvim_buf_get_name(buf)
+
+    if buf_name:match 'diagnostics://' then
+      vim.api.nvim_set_current_win(win)
+      return true
+    end
+  end
+
+  return false
+end
+
+-- Keymap to enter diagnostic window with ';'
+vim.keymap.set('n', ';', function()
+  if not enter_diagnostic_window() then
+    vim.cmd 'normal! ;'
+  end
+end, { noremap = true, silent = true })
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
