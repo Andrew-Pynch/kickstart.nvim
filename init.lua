@@ -168,7 +168,30 @@ vim.diagnostic.config {
   underline = true,
   update_in_insert = false,
   severity_sort = false,
+  float = {
+    focusable = false,
+    style = 'minimal',
+    border = 'rounded',
+    source = 'always',
+    header = '',
+    prefix = '',
+  },
 }
+
+vim.api.nvim_create_autocmd('CursorHold', {
+  buffer = bufnr,
+  callback = function()
+    local opts = {
+      focusable = false,
+      close_events = { 'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost' },
+      border = 'rounded',
+      source = 'always',
+      prefix = ' ',
+      scope = 'cursor',
+    }
+    vim.diagnostic.open_float(nil, opts)
+  end,
+})
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
@@ -487,6 +510,43 @@ require('lazy').setup({
   },
   {
     'ThePrimeagen/harpoon',
+  },
+  {
+    'folke/trouble.nvim',
+    opts = {}, -- for default options, refer to the configuration section for custom setup.
+    cmd = 'Trouble',
+    keys = {
+      {
+        '<leader>xx',
+        '<cmd>Trouble diagnostics toggle<cr>',
+        desc = 'Diagnostics (Trouble)',
+      },
+      {
+        '<leader>xX',
+        '<cmd>Trouble diagnostics toggle filter.buf=0<cr>',
+        desc = 'Buffer Diagnostics (Trouble)',
+      },
+      {
+        '<leader>cs',
+        '<cmd>Trouble symbols toggle focus=false<cr>',
+        desc = 'Symbols (Trouble)',
+      },
+      {
+        '<leader>cl',
+        '<cmd>Trouble lsp toggle focus=false win.position=right<cr>',
+        desc = 'LSP Definitions / references / ... (Trouble)',
+      },
+      {
+        '<leader>xL',
+        '<cmd>Trouble loclist toggle<cr>',
+        desc = 'Location List (Trouble)',
+      },
+      {
+        '<leader>xQ',
+        '<cmd>Trouble qflist toggle<cr>',
+        desc = 'Quickfix List (Trouble)',
+      },
+    },
   },
   {
     'goolord/alpha-nvim',
@@ -1009,8 +1069,8 @@ require('lazy').setup({
         }
       end,
       formatters_by_ft = {
-        rust = { 'rust_analyzer' },
         ['*'] = { 'prettier' },
+        rust_analyzer = { 'rust_analyzer' },
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
@@ -1379,18 +1439,6 @@ vim.keymap.set('n', '<leader>j', '<C-w>j')
 vim.keymap.set('n', '<leader>k', '<C-w>k')
 vim.keymap.set('n', '<leader>l', '<C-w>l')
 
--- auto save on insert leave
-vim.api.nvim_create_autocmd('InsertLeave', {
-  pattern = '*',
-  callback = function()
-    if vim.bo.modified then
-      vim.cmd 'silent! write'
-      vim.notify('File saved', vim.log.levels.INFO)
-    end
-  end,
-  nested = true,
-})
-
 -- Mason and LSP setup for tailwindcss
 -- local status, mason = pcall(require, 'mason')
 -- if not status then
@@ -1413,3 +1461,15 @@ vim.api.nvim_create_autocmd('InsertLeave', {
 -- enable relative line numbers
 vim.opt.number = true
 vim.opt.relativenumber = true
+
+-- Auto save on insert leave
+vim.api.nvim_create_autocmd('InsertLeave', {
+  pattern = '*',
+  callback = function()
+    if vim.bo.modified then
+      vim.cmd 'silent! write'
+      vim.notify('File saved', vim.log.levels.INFO)
+    end
+  end,
+  nested = true,
+})
