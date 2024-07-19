@@ -1019,6 +1019,10 @@ require('lazy').setup({
         tsserver = {},
         --
 
+        zls = {
+          cmd = { '/usr/local/bin/zls' },
+        },
+
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -1093,6 +1097,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         ['*'] = { 'prettier' },
+        zig = { 'zig fmt' },
         rust_analyzer = { 'rust_analyzer' },
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
@@ -1280,6 +1285,7 @@ require('lazy').setup({
         return '%2l:%-2v'
       end
 
+      require('mini.pairs').setup()
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
