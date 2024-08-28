@@ -1546,6 +1546,3 @@ end, {})
 
 -- Add a keybinding to trigger the CopyDiagnostic command
 vim.keymap.set('n', '<leader>dc', ':CopyDiagnostic<CR>', { noremap = true, silent = true, desc = 'Copy Diagnostic' })
-
--- binding to format the current buffer
-vim.kepmap.set()
