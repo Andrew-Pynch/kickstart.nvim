@@ -1440,11 +1440,7 @@ vim.keymap.set('n', '<leader>gb', '<cmd>b#<CR>', { noremap = true, silent = true
 vim.keymap.set('n', '<leader>bd', '<cmd>bd<CR>')
 
 vim.keymap.set('n', '<leader>t', '<cmd>ToggleTerm<CR>')
--- TODO: I think I can deprecate this
--- vim.keymap.set('n', '<leader>ff', function()
---   vim.cmd 'Neoformat'
---   vim.cmd 'w'
--- end)
+vim.keymap.set('n', '<leader>ff', '<cmd>lua vim.lsp.buf.format()<CR>')
 vim.keymap.set('n', '<leader>cf', '<cmd>silent !cargo fmt --quiet<CR>')
 vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>')
 vim.keymap.set('n', '<leader>E', '<cmd>Neotree reveal<CR>')
@@ -1510,3 +1506,46 @@ vim.api.nvim_create_autocmd('InsertLeave', {
 })
 
 vim.keymap.set('n', '<leader>pst', '<cmd>SupermavenToggle<CR>')
+
+-- Language server bindings
+vim.keymap.set('n', '<leader>lr', function()
+  vim.cmd 'LspRestart zls'
+  vim.notify('Zig Language Server restarted', vim.log.levels.INFO)
+end, { noremap = true, silent = true, desc = 'Restart Zig Language Server' })
+
+vim.keymap.set('n', '<leader>ts', function()
+  local parsers = require 'nvim-treesitter.parsers'
+  local lang = parsers.get_parser():lang()
+  vim.notify('Active Treesitter parser: ' .. lang, vim.log.levels.INFO)
+end, { noremap = true, silent = true, desc = 'Show active Treesitter parser' })
+
+vim.keymap.set('n', '<leader>la', function()
+  local active_clients = vim.lsp.get_active_clients()
+  local client_names = {}
+  for _, client in ipairs(active_clients) do
+    table.insert(client_names, client.name)
+  end
+  if #client_names > 0 then
+    vim.notify('Active Language Servers: ' .. table.concat(client_names, ', '), vim.log.levels.INFO)
+  else
+    vim.notify('No active Language Servers', vim.log.levels.INFO)
+  end
+end, { noremap = true, silent = true, desc = 'Show all active Language Servers' })
+
+-- Add this new function to copy the diagnostic message
+vim.api.nvim_create_user_command('CopyDiagnostic', function()
+  local diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
+  if #diagnostics > 0 then
+    local message = diagnostics[1].message
+    vim.fn.setreg('+', message)
+    vim.notify('Diagnostic copied to clipboard', vim.log.levels.INFO)
+  else
+    vim.notify('No diagnostic message found', vim.log.levels.WARN)
+  end
+end, {})
+
+-- Add a keybinding to trigger the CopyDiagnostic command
+vim.keymap.set('n', '<leader>dc', ':CopyDiagnostic<CR>', { noremap = true, silent = true, desc = 'Copy Diagnostic' })
+
+-- binding to format the current buffer
+vim.kepmap.set()
