@@ -279,11 +279,19 @@ require('lazy').setup({
     'nvim-neo-tree/neo-tree.nvim',
     config = function()
       require('neo-tree').setup {
+        event_handlers = {
+          {
+            event = 'neo_tree_popup_input_ready',
+            handler = function(args)
+              vim.cmd 'stopinsert'
+              vim.keymap.set('i', '<esc>', vim.cmd.stopinsert, { noremap = true, buffer = args.bufnr })
+            end,
+          },
+        },
         close_if_last_window = false,
         popup_border_style = 'rounded',
         enable_git_status = true,
         enable_diagnostics = true,
-        enable_normal_mode_for_inputs = false,
         open_files_do_not_replace_types = { 'terminal', 'trouble', 'qf' },
         sort_case_insensitive = false,
         sort_function = nil,
@@ -721,19 +729,21 @@ require('lazy').setup({
       require('which-key').setup()
 
       -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-        ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-        ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-      }
-      -- visual mode
-      require('which-key').register({
-        ['<leader>h'] = { 'Git [H]unk' },
-      }, { mode = 'v' })
+      -- require('which-key').register {
+      --   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
+      --   ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+      --   ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
+      --   ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
+      --   ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+      --   ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
+      --   ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+      --   ['<leader>x'] = { name = 'Trouble/Diagnostics', _ = 'which_key_ignore' },
+      --   ['<leader>p'] = { name = 'Project/Harpoon', _ = 'which_key_ignore' },
+      -- }
+      -- -- visual mode
+      -- require('which-key').register({
+      --   ['<leader>h'] = { 'Git [H]unk' },
+      -- }, { mode = 'v' })
     end,
   },
 
@@ -818,7 +828,12 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>sg', function()
+        local status, err = pcall(builtin.live_grep)
+        if not status then
+          vim.notify('Telescope grep error: ' .. tostring(err), vim.log.levels.ERROR)
+        end
+      end, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
@@ -1007,7 +1022,7 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         clangd = {},
-        gopls = {},
+        -- gopls = {},
         pyright = {},
         rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -1016,7 +1031,7 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        tsserver = {},
+        -- tsserver = {},
         --
 
         zls = {
