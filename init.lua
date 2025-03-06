@@ -27,6 +27,7 @@ What is Kickstart?
     The goal is that you can read every line of code, top-to-bottom, understand
     what your configuration is doing, and modify it to suit your needs.
 
+
     Once you've done that, you can start exploring, configuring and tinkering to
     make Neovim your own! That might mean leaving Kickstart just the way it is for a while
     or immediately breaking it into modular pieces. It's up to you!
@@ -275,6 +276,36 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  {
+    'andrew-pynch/nvim-ctx-dump',
+    config = function()
+      require('nvim-ctx-dump').setup {
+        keymaps = {
+          add = '<leader>xa', -- Add to context
+          show = '<leader>xs', -- Show context
+          copy = '<leader>xc', -- Copy context
+          clear = '<leader>xz', -- Clear context
+        },
+      }
+    end,
+  },
+  {
+    'habamax/vim-godot',
+    ft = { 'gdscript', 'gd' },
+    config = function()
+      -- Change this path to where your Godot executable is
+      vim.g.godot_executable = 'godot'
+      -- Set indent width to 4 for GDScript (Godot's default)
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = { 'gdscript', 'gd' },
+        callback = function()
+          vim.bo.tabstop = 4
+          vim.bo.shiftwidth = 4
+          vim.bo.softtabstop = 4
+        end,
+      })
+    end,
+  },
   {
     'nvim-neo-tree/neo-tree.nvim',
     config = function()
@@ -1021,6 +1052,9 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
+        glsl_analyzer = {
+          filetypes = { 'glsl', 'vert', 'frag', 'geom', 'comp' },
+        },
         clangd = {},
         -- gopls = {},
         pyright = {},
@@ -1067,6 +1101,8 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'clang-format', -- c / cpp
+        'glsl_analyzer',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -1081,6 +1117,18 @@ require('lazy').setup({
             require('lspconfig')[server_name].setup(server)
           end,
         },
+      }
+
+      require('lspconfig').gdscript.setup {
+        on_attach = function(client, bufnr)
+          vim.api.nvim_buf_create_user_command(bufnr, 'GodotRun', function()
+            vim.cmd '!godot -e'
+          end, { desc = 'Run the current Godot project' })
+
+          vim.api.nvim_buf_create_user_command(bufnr, 'GodotRunCurrent', function()
+            vim.cmd('!godot -e --scene=' .. vim.fn.expand '%:p')
+          end, { desc = 'Run the current scene' })
+        end,
       }
     end,
   },
@@ -1119,6 +1167,7 @@ require('lazy').setup({
         python = { 'isort', 'black' },
         c = { 'clang_format' },
         cpp = { 'clang_format' },
+        glsl = { 'clang-format' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
@@ -1561,3 +1610,23 @@ end, {})
 
 -- Add a keybinding to trigger the CopyDiagnostic command
 vim.keymap.set('n', '<leader>dc', ':CopyDiagnostic<CR>', { noremap = true, silent = true, desc = 'Copy Diagnostic' })
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'gd', 'gdscript' },
+  callback = function()
+    -- Run the current scene
+    vim.keymap.set('n', '<leader>gr', ':GodotRunCurrent<CR>', {
+      buffer = true,
+      desc = 'Run current scene in Godot',
+      noremap = true,
+      silent = true,
+    })
+    -- Run the project
+    vim.keymap.set('n', '<leader>gR', ':GodotRun<CR>', {
+      buffer = true,
+      desc = 'Run project in Godot',
+      noremap = true,
+      silent = true,
+    })
+  end,
+})
