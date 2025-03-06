@@ -285,6 +285,7 @@ require('lazy').setup({
           show = '<leader>xs', -- Show context
           copy = '<leader>xc', -- Copy context
           clear = '<leader>xz', -- Clear context
+          copy_paths = '<leader>xf', -- Copy file paths only
         },
       }
     end,
