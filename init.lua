@@ -1,4 +1,5 @@
 --[[
+--
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
 =====================================================================
@@ -1629,5 +1630,15 @@ vim.api.nvim_create_autocmd('FileType', {
       noremap = true,
       silent = true,
     })
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'c',
+  callback = function()
+    vim.bo.tabstop = 4
+    vim.bo.shiftwidth = 4
+    vim.bo.softtabstop = 4
+    vim.bo.expandtab = true -- Use spaces instead of tabs
   end,
 })
