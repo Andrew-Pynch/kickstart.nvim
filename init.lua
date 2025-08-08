@@ -276,6 +276,12 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
+  {
+    'iamcco/markdown-preview.nvim', 
+    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+    ft = { 'markdown' },
+    build = function() vim.fn['mkdp#util#install']() end,
+  },
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   {
     'andrew-pynch/nvim-ctx-dump',
@@ -1643,3 +1649,17 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.bo.expandtab = true -- Use spaces instead of tabs
   end,
 })
+
+-- Markdown Preview Keybindings
+vim.keymap.set('n', '<leader>md', '<cmd>MarkdownPreview<CR>', 
+  { noremap = true, silent = true, desc = '[M]arkdown Preview [D]isplay' })
+
+vim.keymap.set('n', '<leader>ms', '<cmd>MarkdownPreviewStop<CR>', 
+  { noremap = true, silent = true, desc = '[M]arkdown Preview [S]top' })
+
+vim.keymap.set('n', '<leader>mt', '<cmd>MarkdownPreviewToggle<CR>', 
+  { noremap = true, silent = true, desc = '[M]arkdown Preview [T]oggle' })
+
+-- Alternative: If you want it under your toggle prefix since you use <leader>t for toggles
+vim.keymap.set('n', '<leader>tm', '<cmd>MarkdownPreviewToggle<CR>', 
+  { noremap = true, silent = true, desc = '[T]oggle [M]arkdown Preview' })
