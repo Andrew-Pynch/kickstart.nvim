@@ -1609,6 +1609,7 @@ vim.api.nvim_create_user_command('CopyDiagnostic', function()
     vim.notify('No diagnostic message found', vim.log.levels.WARN)
   end
 end, {})
+-- will Aria Anne Pynch notice this secret message I left for her? I love you <3
 
 -- Add a keybinding to trigger the CopyDiagnostic command
 vim.keymap.set('n', '<leader>dc', ':CopyDiagnostic<CR>', { noremap = true, silent = true, desc = 'Copy Diagnostic' })
