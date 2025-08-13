@@ -1663,3 +1663,11 @@ vim.keymap.set('n', '<leader>mt', '<cmd>MarkdownPreviewToggle<CR>',
 -- Alternative: If you want it under your toggle prefix since you use <leader>t for toggles
 vim.keymap.set('n', '<leader>tm', '<cmd>MarkdownPreviewToggle<CR>', 
   { noremap = true, silent = true, desc = '[T]oggle [M]arkdown Preview' })
+
+-- Disable diagnostics for markdown files
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown",
+  callback = function()
+    vim.diagnostic.enable(false, { bufnr = 0 })
+  end,
+})
