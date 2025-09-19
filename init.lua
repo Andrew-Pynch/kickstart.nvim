@@ -91,6 +91,14 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- Suppress lspconfig deprecation warning (must be before lazy.nvim loads)
+vim.notify_once = function() end -- temporarily disable notify
+local original_notify = vim.notify
+vim.deprecate = function() return function() end end
+
+-- Set to true if you have a Nerd Font installed
+vim.g.have_nerd_font = false
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
 
@@ -277,7 +285,7 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   {
-    'iamcco/markdown-preview.nvim', 
+    'iamcco/markdown-preview.nvim',
     cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
     ft = { 'markdown' },
     build = function() vim.fn['mkdp#util#install']() end,
@@ -288,10 +296,10 @@ require('lazy').setup({
     config = function()
       require('nvim-ctx-dump').setup {
         keymaps = {
-          add = '<leader>xa', -- Add to context
-          show = '<leader>xs', -- Show context
-          copy = '<leader>xc', -- Copy context
-          clear = '<leader>xz', -- Clear context
+          add = '<leader>xa',        -- Add to context
+          show = '<leader>xs',       -- Show context
+          copy = '<leader>xc',       -- Copy context
+          clear = '<leader>xz',      -- Clear context
           copy_paths = '<leader>xf', -- Copy file paths only
         },
       }
@@ -549,6 +557,18 @@ require('lazy').setup({
       require('colorizer').setup()
     end,
   },
+  {
+    'uga-rosa/ccc.nvim',
+    config = function()
+      require('ccc').setup({
+        highlighter = {
+          auto_enable = true,
+          lsp = true,
+          filetypes = { 'css', 'scss', 'sass', 'less', 'stylus', 'javascript', 'typescript', 'jsx', 'tsx', 'vue' },
+        },
+      })
+    end,
+  },
   'prisma/vim-prisma',
   'nvim-lua/plenary.nvim',
   {
@@ -726,7 +746,7 @@ require('lazy').setup({
   --    require('Comment').setup({})
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',    opts = {} },
 
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
@@ -761,7 +781,7 @@ require('lazy').setup({
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  { -- Useful plugin to show you pending keybinds.
+  {                     -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     config = function() -- This is the function that runs, AFTER loading
@@ -815,7 +835,7 @@ require('lazy').setup({
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -905,6 +925,7 @@ require('lazy').setup({
 
   { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
+    version = '*',
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim
       { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
@@ -913,11 +934,11 @@ require('lazy').setup({
 
       -- Useful status updates for LSP.
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
 
       -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
       -- used for completion, annotations and signatures of Neovim apis
-      { 'folke/neodev.nvim', opts = {} },
+      { 'folke/neodev.nvim',       opts = {} },
     },
     config = function()
       -- Brief aside: **What is LSP?**
@@ -1108,7 +1129,7 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
+        'stylua',       -- Used to format Lua code
         'clang-format', -- c / cpp
         'glsl_analyzer',
       })
@@ -1651,17 +1672,17 @@ vim.api.nvim_create_autocmd('FileType', {
 })
 
 -- Markdown Preview Keybindings
-vim.keymap.set('n', '<leader>md', '<cmd>MarkdownPreview<CR>', 
+vim.keymap.set('n', '<leader>md', '<cmd>MarkdownPreview<CR>',
   { noremap = true, silent = true, desc = '[M]arkdown Preview [D]isplay' })
 
-vim.keymap.set('n', '<leader>ms', '<cmd>MarkdownPreviewStop<CR>', 
+vim.keymap.set('n', '<leader>ms', '<cmd>MarkdownPreviewStop<CR>',
   { noremap = true, silent = true, desc = '[M]arkdown Preview [S]top' })
 
-vim.keymap.set('n', '<leader>mt', '<cmd>MarkdownPreviewToggle<CR>', 
+vim.keymap.set('n', '<leader>mt', '<cmd>MarkdownPreviewToggle<CR>',
   { noremap = true, silent = true, desc = '[M]arkdown Preview [T]oggle' })
 
 -- Alternative: If you want it under your toggle prefix since you use <leader>t for toggles
-vim.keymap.set('n', '<leader>tm', '<cmd>MarkdownPreviewToggle<CR>', 
+vim.keymap.set('n', '<leader>tm', '<cmd>MarkdownPreviewToggle<CR>',
   { noremap = true, silent = true, desc = '[T]oggle [M]arkdown Preview' })
 
 -- Disable diagnostics for markdown files
@@ -1671,3 +1692,6 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.diagnostic.enable(false, { bufnr = 0 })
   end,
 })
+
+-- Suppress lspconfig deprecation warning
+vim.g.lspconfig = { suppress_deprecation_warning = true }
