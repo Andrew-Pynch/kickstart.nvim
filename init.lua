@@ -700,12 +700,24 @@ require('lazy').setup({
         },
       }
 
+      -- Apply default capabilities to all servers and register per-server overrides.
+      vim.lsp.config('*', {
+        capabilities = capabilities,
+      })
+
+      for name, server in pairs(servers) do
+        vim.lsp.config(name, server)
+      end
+
+      local server_names = vim.tbl_keys(servers)
+
       -- Ensure the servers and tools above are installed
       --
       -- To check the current status of installed tools and/or manually install
       -- other tools, you can run
       --    :Mason
       --
+<<<<<<< Updated upstream
       -- You can press `g?` for help in this menu.
       --
       -- `mason` had to be setup earlier: to configure its options see the
@@ -716,10 +728,19 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+=======
+      --  You can press `g?` for help in this menu.
+      local ensure_installed = vim.deepcopy(server_names)
+      vim.list_extend(ensure_installed, {
+        'stylua', -- Used to format Lua code
+        'clang-format', -- c / cpp
+>>>>>>> Stashed changes
       })
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
+      require('mason').setup()
+      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
       require('mason-lspconfig').setup {
+<<<<<<< Updated upstream
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_installation = false,
         handlers = {
@@ -733,6 +754,23 @@ require('lazy').setup({
           end,
         },
       }
+=======
+        ensure_installed = server_names,
+      }
+
+      vim.lsp.config('gdscript', {
+        on_attach = function(client, bufnr)
+          vim.api.nvim_buf_create_user_command(bufnr, 'GodotRun', function()
+            vim.cmd '!godot -e'
+          end, { desc = 'Run the current Godot project' })
+
+          vim.api.nvim_buf_create_user_command(bufnr, 'GodotRunCurrent', function()
+            vim.cmd('!godot -e --scene=' .. vim.fn.expand '%:p')
+          end, { desc = 'Run the current scene' })
+        end,
+      })
+      vim.lsp.enable('gdscript')
+>>>>>>> Stashed changes
     end,
   },
 
