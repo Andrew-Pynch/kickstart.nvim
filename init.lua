@@ -94,7 +94,9 @@ vim.g.maplocalleader = ' '
 -- Suppress lspconfig deprecation warning (must be before lazy.nvim loads)
 vim.notify_once = function() end -- temporarily disable notify
 local original_notify = vim.notify
-vim.deprecate = function() return function() end end
+vim.deprecate = function()
+  return function() end
+end
 
 -- Set to true if you have a Nerd Font installed
 vim.g.have_nerd_font = false
@@ -288,7 +290,9 @@ require('lazy').setup({
     'iamcco/markdown-preview.nvim',
     cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
     ft = { 'markdown' },
-    build = function() vim.fn['mkdp#util#install']() end,
+    build = function()
+      vim.fn['mkdp#util#install']()
+    end,
   },
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   {
@@ -296,10 +300,10 @@ require('lazy').setup({
     config = function()
       require('nvim-ctx-dump').setup {
         keymaps = {
-          add = '<leader>xa',        -- Add to context
-          show = '<leader>xs',       -- Show context
-          copy = '<leader>xc',       -- Copy context
-          clear = '<leader>xz',      -- Clear context
+          add = '<leader>xa', -- Add to context
+          show = '<leader>xs', -- Show context
+          copy = '<leader>xc', -- Copy context
+          clear = '<leader>xz', -- Clear context
           copy_paths = '<leader>xf', -- Copy file paths only
         },
       }
@@ -560,13 +564,13 @@ require('lazy').setup({
   {
     'uga-rosa/ccc.nvim',
     config = function()
-      require('ccc').setup({
+      require('ccc').setup {
         highlighter = {
           auto_enable = true,
           lsp = true,
           filetypes = { 'css', 'scss', 'sass', 'less', 'stylus', 'javascript', 'typescript', 'jsx', 'tsx', 'vue' },
         },
-      })
+      }
     end,
   },
   'prisma/vim-prisma',
@@ -746,7 +750,7 @@ require('lazy').setup({
   --    require('Comment').setup({})
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim',    opts = {} },
+  { 'numToStr/Comment.nvim', opts = {} },
 
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
@@ -781,7 +785,7 @@ require('lazy').setup({
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  {                     -- Useful plugin to show you pending keybinds.
+  { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     config = function() -- This is the function that runs, AFTER loading
@@ -835,7 +839,7 @@ require('lazy').setup({
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -934,11 +938,11 @@ require('lazy').setup({
 
       -- Useful status updates for LSP.
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim',       opts = {} },
+      { 'j-hui/fidget.nvim', opts = {} },
 
       -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
       -- used for completion, annotations and signatures of Neovim apis
-      { 'folke/neodev.nvim',       opts = {} },
+      { 'folke/neodev.nvim', opts = {} },
     },
     config = function()
       -- Brief aside: **What is LSP?**
@@ -1081,6 +1085,8 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
+
+        -- inside `local servers = { ... }`
         glsl_analyzer = {
           filetypes = { 'glsl', 'vert', 'frag', 'geom', 'comp' },
         },
@@ -1129,7 +1135,7 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua',       -- Used to format Lua code
+        'stylua', -- Used to format Lua code
         'clang-format', -- c / cpp
         'glsl_analyzer',
       })
@@ -1423,7 +1429,15 @@ require('lazy').setup({
       -- Prefer git instead of curl in order to improve connectivity in some environments
       require('nvim-treesitter.install').prefer_git = true
       ---@diagnostic disable-next-line: missing-fields
-      require('nvim-treesitter.configs').setup(opts)
+      -- inside your treesitter plugin spec's config = function(_, opts) ... end
+      local ok, ts = pcall(require, 'nvim-treesitter.configs')
+      if ok then
+        ts.setup(opts)
+      else
+        vim.schedule(function()
+          vim.notify('nvim-treesitter not installed yet (run :Lazy sync)', vim.log.levels.WARN)
+        end)
+      end
 
       -- There are additional nvim-treesitter modules that you can use to interact
       -- with nvim-treesitter. You should go explore a few and see what interests you:
@@ -1672,22 +1686,18 @@ vim.api.nvim_create_autocmd('FileType', {
 })
 
 -- Markdown Preview Keybindings
-vim.keymap.set('n', '<leader>md', '<cmd>MarkdownPreview<CR>',
-  { noremap = true, silent = true, desc = '[M]arkdown Preview [D]isplay' })
+vim.keymap.set('n', '<leader>md', '<cmd>MarkdownPreview<CR>', { noremap = true, silent = true, desc = '[M]arkdown Preview [D]isplay' })
 
-vim.keymap.set('n', '<leader>ms', '<cmd>MarkdownPreviewStop<CR>',
-  { noremap = true, silent = true, desc = '[M]arkdown Preview [S]top' })
+vim.keymap.set('n', '<leader>ms', '<cmd>MarkdownPreviewStop<CR>', { noremap = true, silent = true, desc = '[M]arkdown Preview [S]top' })
 
-vim.keymap.set('n', '<leader>mt', '<cmd>MarkdownPreviewToggle<CR>',
-  { noremap = true, silent = true, desc = '[M]arkdown Preview [T]oggle' })
+vim.keymap.set('n', '<leader>mt', '<cmd>MarkdownPreviewToggle<CR>', { noremap = true, silent = true, desc = '[M]arkdown Preview [T]oggle' })
 
 -- Alternative: If you want it under your toggle prefix since you use <leader>t for toggles
-vim.keymap.set('n', '<leader>tm', '<cmd>MarkdownPreviewToggle<CR>',
-  { noremap = true, silent = true, desc = '[T]oggle [M]arkdown Preview' })
+vim.keymap.set('n', '<leader>tm', '<cmd>MarkdownPreviewToggle<CR>', { noremap = true, silent = true, desc = '[T]oggle [M]arkdown Preview' })
 
 -- Disable diagnostics for markdown files
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "markdown",
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'markdown',
   callback = function()
     vim.diagnostic.enable(false, { bufnr = 0 })
   end,
