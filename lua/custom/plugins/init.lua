@@ -38,5 +38,18 @@ return {
       map('t', '<leader>a', '<C-\\><C-n><cmd>ClaudeCode<CR>', { desc = 'Toggle Claude from terminal' })
       map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Escape terminal mode' })
     end
-  }
+  },
+  {
+    "sindrets/diffview.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      require("diffview").setup()
+
+      local map = vim.keymap.set
+      map("n", "<leader>gd", "<cmd>DiffviewOpen<CR>", { desc = "Diffview open (all changes)" })
+      map("n", "<leader>gF", "<cmd>DiffviewFileHistory<CR>", { desc = "Diffview file history (project)" })
+      map("n", "<leader>gf", "<cmd>DiffviewFileHistory %<CR>", { desc = "Diffview file history (buffer)" })
+      map("n", "<leader>gc", "<cmd>DiffviewClose<CR>", { desc = "Diffview close" })
+    end,
+  },
 }
