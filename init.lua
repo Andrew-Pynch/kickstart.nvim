@@ -1155,13 +1155,16 @@ require('lazy').setup({
       }
 
       require('lspconfig').gdscript.setup {
+        name = 'godot',
+        -- Force TCP connection to localhost:6005 (Godot 4 default)
+        cmd = vim.lsp.rpc.connect('127.0.0.1', 6005),
         on_attach = function(client, bufnr)
           vim.api.nvim_buf_create_user_command(bufnr, 'GodotRun', function()
-            vim.cmd '!godot -e'
+            vim.fn.jobstart('godot -e', { detach = true })
           end, { desc = 'Run the current Godot project' })
 
           vim.api.nvim_buf_create_user_command(bufnr, 'GodotRunCurrent', function()
-            vim.cmd('!godot -e --scene=' .. vim.fn.expand '%:p')
+            vim.fn.jobstart({ 'godot', '-e', '--scene=' .. vim.fn.expand '%:p' }, { detach = true })
           end, { desc = 'Run the current scene' })
         end,
       }
