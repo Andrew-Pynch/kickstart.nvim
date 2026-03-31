@@ -299,6 +299,7 @@ require('lazy').setup({
     'andrew-pynch/nvim-ctx-dump',
     config = function()
       require('nvim-ctx-dump').setup {
+        silent = true,
         keymaps = {
           add = '<leader>xa', -- Add to context
           show = '<leader>xs', -- Show context
@@ -1138,6 +1139,8 @@ require('lazy').setup({
         'stylua', -- Used to format Lua code
         'clang-format', -- c / cpp
         'glsl_analyzer',
+        'black', -- Python formatter
+        'isort', -- Python import sorter
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -1176,9 +1179,9 @@ require('lazy').setup({
     lazy = false,
     keys = {
       {
-        '<leader>f',
+        '<leader>ff',
         function()
-          require('conform').format { async = true, lsp_fallback = true }
+          require('conform').format { async = true, lsp_format = 'fallback' }
         end,
         mode = '',
         desc = '[F]ormat buffer',
@@ -1197,9 +1200,9 @@ require('lazy').setup({
       --   }
       -- end,
       formatters_by_ft = {
-        ['*'] = { 'prettier' },
+        ['_'] = { 'prettier' },
         zig = { 'zig fmt' },
-        rust_analyzer = { 'rust_analyzer' },
+        rust = { 'rustfmt' },
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         python = { 'isort', 'black' },
@@ -1424,7 +1427,7 @@ require('lazy').setup({
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = true, disable = { 'ruby', 'python', 'rust' } },
     },
     config = function(_, opts)
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -1550,7 +1553,6 @@ vim.keymap.set('n', '<leader>gb', '<cmd>b#<CR>', { noremap = true, silent = true
 vim.keymap.set('n', '<leader>bd', '<cmd>bd<CR>')
 
 vim.keymap.set('n', '<leader>t', '<cmd>ToggleTerm<CR>')
-vim.keymap.set('n', '<leader>ff', '<cmd>lua vim.lsp.buf.format()<CR>')
 vim.keymap.set('n', '<leader>cf', '<cmd>silent !cargo fmt --quiet<CR>')
 vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>')
 vim.keymap.set('n', '<leader>E', '<cmd>Neotree reveal<CR>')
@@ -1685,6 +1687,26 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.bo.shiftwidth = 4
     vim.bo.softtabstop = 4
     vim.bo.expandtab = true -- Use spaces instead of tabs
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'python',
+  callback = function()
+    vim.bo.tabstop = 4
+    vim.bo.shiftwidth = 4
+    vim.bo.softtabstop = 4
+    vim.bo.expandtab = true
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'rust',
+  callback = function()
+    vim.bo.tabstop = 4
+    vim.bo.shiftwidth = 4
+    vim.bo.softtabstop = 4
+    vim.bo.expandtab = true
   end,
 })
 
