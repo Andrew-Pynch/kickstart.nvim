@@ -1155,6 +1155,18 @@ require('lazy').setup({
         },
       }
 
+      require('lspconfig').ols.setup {
+        capabilities = capabilities,
+        cmd = { '/home/andrew/.local/src/ols/ols' },
+        cmd_env = {
+          OLS_BUILTIN_FOLDER = '/home/andrew/.local/src/ols/builtin',
+        },
+        init_options = {
+          odin_command = '/usr/bin/odin',
+          odin_root_override = '/usr/lib/odin',
+        },
+      }
+
       require('lspconfig').gdscript.setup {
         name = 'godot',
         -- Force TCP connection to localhost:6005 (Godot 4 default)
@@ -1214,9 +1226,17 @@ require('lazy').setup({
         c = { 'clang_format' },
         cpp = { 'clang_format' },
         glsl = { 'clang-format' },
+        odin = { 'odinfmt' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
+      },
+      formatters = {
+        odinfmt = {
+          command = '/home/andrew/.local/src/ols/odinfmt',
+          args = { '-stdin' },
+          stdin = true,
+        },
       },
     },
   },
