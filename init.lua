@@ -597,9 +597,6 @@ require('lazy').setup({
           end
           return false
         end,
-        on_before_save = function()
-          vim.cmd 'Neoformat'
-        end,
       }
     end,
   },
@@ -1141,6 +1138,7 @@ require('lazy').setup({
         'glsl_analyzer',
         'black', -- Python formatter
         'isort', -- Python import sorter
+        'prettier', -- JS/TS/web formatter
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -1189,18 +1187,25 @@ require('lazy').setup({
     },
     opts = {
       notify_on_error = true,
-      -- format_on_save = function(bufnr)
-      --   -- Disable "format_on_save lsp_fallback" for languages that don't
-      --   -- have a well standardized coding style. You can add additional
-      --   -- languages here or re-enable it for the disabled ones.
-      --   local disable_filetypes = { c = true, cpp = true }
-      --   return {
-      --     timeout_ms = 1000,
-      --     lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
-      --   }
-      -- end,
+      format_on_save = {
+        timeout_ms = 1000,
+        lsp_format = 'fallback',
+      },
       formatters_by_ft = {
-        ['_'] = { 'prettier' },
+        javascript = { 'prettier' },
+        javascriptreact = { 'prettier' },
+        typescript = { 'prettier' },
+        typescriptreact = { 'prettier' },
+        json = { 'prettier' },
+        jsonc = { 'prettier' },
+        css = { 'prettier' },
+        scss = { 'prettier' },
+        sass = { 'prettier' },
+        less = { 'prettier' },
+        html = { 'prettier' },
+        vue = { 'prettier' },
+        yaml = { 'prettier' },
+        markdown = { 'prettier' },
         zig = { 'zig fmt' },
         rust = { 'rustfmt' },
         lua = { 'stylua' },
@@ -1605,18 +1610,6 @@ vim.keymap.set('n', '<leader>l', '<C-w>l')
 vim.opt.number = true
 vim.opt.relativenumber = true
 
--- Auto save on insert leave
-vim.api.nvim_create_autocmd('InsertLeave', {
-  pattern = '*',
-  callback = function()
-    if vim.bo.modified then
-      vim.cmd 'silent! write'
-      vim.notify('File saved', vim.log.levels.INFO)
-    end
-  end,
-  nested = true,
-})
-
 vim.keymap.set('n', '<leader>pst', '<cmd>SupermavenToggle<CR>')
 
 -- Language server bindings
@@ -1677,6 +1670,16 @@ vim.api.nvim_create_autocmd('FileType', {
       noremap = true,
       silent = true,
     })
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
+  callback = function()
+    vim.bo.tabstop = 2
+    vim.bo.shiftwidth = 2
+    vim.bo.softtabstop = 2
+    vim.bo.expandtab = true
   end,
 })
 
