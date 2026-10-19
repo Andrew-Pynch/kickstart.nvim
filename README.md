@@ -1,3 +1,8 @@
+> **Deprecated (2026-10-19).** This config now lives in
+> [personal-agent-monorepo](https://github.com/Andrew-Pynch/personal-agent-monorepo)
+> at `packages/workstation-config/config/nvim`, and `workstation-config apply`
+> links it to `~/.config/nvim`. Make changes there; this repo is kept for history only.
+
 # kickstart.nvim
 
 ## Introduction
